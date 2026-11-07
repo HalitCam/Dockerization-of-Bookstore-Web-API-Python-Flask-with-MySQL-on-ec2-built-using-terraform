@@ -1,0 +1,44 @@
+name: bookstore-app
+services:
+  bookstore-app:
+    build: .
+    ports:
+      - "80:80"
+    # environment:
+    #   MYSQL_DATABASE_HOST: database
+    #   MYSQL_DATABASE_USER: clarusway
+    #   MYSQL_DATABASE_PASSWORD: Clarusway_1
+    #   MYSQL_DATABASE_DB: bookstore_db
+    depends_on:
+      database:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - book-net2
+
+  database:
+    image: mysql:latest 
+    environment:
+      MYSQL_ROOT_PASSWORD: admin
+      MYSQL_DATABASE: bookstore_db
+      MYSQL_USER: clarusway
+      MYSQL_PASSWORD: Clarusway_1
+    ports:
+      - "3306:3306"
+    volumes:
+      - database-bookstore:/var/lib/mysql
+    networks:
+      - book-net2
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+networks:
+  book-net2:
+
+    driver: bridge
+volumes:
+  database-bookstore:
